@@ -44,11 +44,11 @@ async function run() {
         // app.get('/order',async())
         //users collector api
         app.put('/users/:email', async (req, res) => {
+            console.log(req.body);
             const email = req.params.email;
             const name = req.body.name;
-            const role = req.body.role;
             const user = req.body;
-            const filter = { email: email, name: name, role: role }
+            const filter = { email: email, name: name }
             const options = { upsert: true };
             const updateDoc = {
                 $set: user
@@ -57,16 +57,22 @@ async function run() {
             res.send(result)
         })
         //make admin
-        app.put('/admin/:email', async (req, res) => {
+        app.put('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             const filter = { email: email };
             const updateDoc = {
                 $set: { role: 'admin' }
-            }
+            };
             const result = await userCollection.updateOne(filter, updateDoc);
             res.send(result)
         })
-
+        // get all admin
+        app.get('/users/:admin', async (req, res) => {
+            const admin = req.body.admin;
+            const query = { admin: admin };
+            const result = await userCollection.find(query).toArray();
+            res.send(result)
+        })
         //all user sender api
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
