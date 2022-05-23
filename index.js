@@ -41,13 +41,14 @@ async function run() {
         })
         //
         // get Order
-        app.get('/order',async())
+        // app.get('/order',async())
         //users collector api
         app.put('/users/:email', async (req, res) => {
             const email = req.params.email;
             const name = req.body.name;
+            const role = req.body.role;
             const user = req.body;
-            const filter = { email: email, name: name }
+            const filter = { email: email, name: name, role: role }
             const options = { upsert: true };
             const updateDoc = {
                 $set: user
@@ -55,9 +56,19 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc, options);
             res.send(result)
         })
+        //make admin
+        app.put('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: { role: 'admin' }
+            }
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result)
+        })
 
         //all user sender api
-        app.get('user/:email', async (req, res) => {
+        app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
             const result = await userCollection.findOne(query);
