@@ -40,11 +40,22 @@ async function run() {
             res.send(result)
         })
         //
+        //manageOrder
+        app.get('/order', async (req, res) => {
+            const query = {};
+            const result = await orderCollection.find(query).toArray();
+            res.send(result)
+
+        })
         // get Order
-        // app.get('/order',async())
+        app.get('/order/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const result = await orderCollection.find(query).toArray();
+            res.send(result)
+        })
         //users collector api
         app.put('/users/:email', async (req, res) => {
-            console.log(req.body);
             const email = req.params.email;
             const name = req.body.name;
             const user = req.body;
@@ -56,30 +67,58 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc, options);
             res.send(result)
         })
+        //update profile
+        app.put('/users/profile/:email', async (req, res) => {
+            const email = req.params.email;
+            const name = req.body.name;
+            const address = req.body.address;
+            const phone = req.body.phone;
+            const education = req.body.education;
+            const filter = { email: email };
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    name: name, address: address, phone: phone, education: education
+                }
+            }
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
+        })
         //make admin
         app.put('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             const filter = { email: email };
-            const updateDoc = {
+            const updatedDoc = {
                 $set: { role: 'admin' }
             };
-            const result = await userCollection.updateOne(filter, updateDoc);
+            const result = await userCollection.updateOne(filter, updatedDoc);
             res.send(result)
         })
+
         // get all admin
         app.get('/users/:admin', async (req, res) => {
-            const admin = req.body.admin;
-            const query = { admin: admin };
+            const admin = req.params.admin;
+            const query = { role: admin };
             const result = await userCollection.find(query).toArray();
             res.send(result)
         })
         //all user sender api
-        app.get('/users/:email', async (req, res) => {
+        app.get('/users/makeadmin/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
             const result = await userCollection.findOne(query);
             res.send(result)
         })
+
+        //users profile api
+        app.get('/users/profile/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const query = { email: email };
+            const result = userCollection.findOne(query);
+            res.send(result)
+        })
+
     }
     finally {
 
