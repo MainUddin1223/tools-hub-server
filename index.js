@@ -18,6 +18,13 @@ async function run() {
         const userCollection = client.db('hm-electronics').collection('users');
         const toolsCollection = client.db('hm-electronics').collection('tools');
         const orderCollection = client.db('hm-electronics').collection('orders');
+        //tools post api
+        app.post('/tools', async (req, res) => {
+            const newTools = req.body;
+            const result = await toolsCollection.insertOne(newTools);
+            res.send(result)
+        })
+
         //tools provide api
         app.get('/tools', async (req, res) => {
             const query = {};
