@@ -154,6 +154,12 @@ async function run() {
             const result = await reviewCollection.insertOne(newReview);
             res.send(result)
         })
+        //review sender
+        app.get('/review', async (req, res) => {
+            const query = {};
+            const result = await reviewCollection.find(query).toArray();
+            res.send(result)
+        })
 
     }
     finally {
