@@ -34,6 +34,7 @@ async function run() {
         const userCollection = client.db('hm-electronics').collection('users');
         const toolsCollection = client.db('hm-electronics').collection('tools');
         const orderCollection = client.db('hm-electronics').collection('orders');
+        const reviewCollection = client.db('hm-electronics').collection('review');
         //tools post api
         app.post('/tools', async (req, res) => {
             const newTools = req.body;
@@ -88,7 +89,6 @@ async function run() {
             }
             const result = await userCollection.updateOne(filter, updateDoc, options);
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
-            console.log(token);
             res.send({ result, token })
         })
         //update profile
@@ -111,7 +111,6 @@ async function run() {
         //user Profile
         app.get('/users/profile/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email);
             const query = { email: email };
             const result = await userCollection.findOne(query)
             res.send(result)
@@ -145,9 +144,14 @@ async function run() {
         //users profile api
         app.get('/users/profile/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email);
             const query = { email: email };
             const result = userCollection.findOne(query);
+            res.send(result)
+        })
+        //review
+        app.post('/review', async (req, res) => {
+            const newReview = req.body;
+            const result = await reviewCollection.insertOne(newReview);
             res.send(result)
         })
 
