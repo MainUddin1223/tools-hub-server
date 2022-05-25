@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express()
@@ -8,7 +9,22 @@ app.use(cors())
 app.use(express.json())
 
 
+// const verifyJWT = async (req, res, next) => {
+//     const authHeader = req.headers.authorization;
+//     console.log('Iam',authHeader);
+//     if (!authHeader) {
+//         return res.status(401).send({ message: 'Unauthorized access' })
+//     }
+//     const token = authHeader.split(' ')[1];
+//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+//         if (err) {
+//             return res.status(403).send({ message: 'Forbidden access' })
+//         }
+//         req.decoded = decoded;
+//         next()
+//     })
 
+// }
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@hmelectronics.qnmf1.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -54,7 +70,7 @@ async function run() {
             res.send(result)
 
         })
-        // get Order
+        // get my Orders
         app.get('/order/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
@@ -65,14 +81,15 @@ async function run() {
         app.put('/users/:email', async (req, res) => {
             const email = req.params.email;
             const name = req.body.name;
-            const user = req.body;
-            const filter = { email: email, name: name }
+            const filter = { email: email }
             const options = { upsert: true };
             const updateDoc = {
-                $set: user
+                $set: { email: email, name: name }
             }
             const result = await userCollection.updateOne(filter, updateDoc, options);
-            res.send(result)
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            console.log(token);
+            res.send({ result, token })
         })
         //update profile
         app.put('/users/profile/:email', async (req, res) => {
@@ -89,6 +106,14 @@ async function run() {
                 }
             }
             const result = await userCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
+        })
+        //user Profile
+        app.get('/users/profile/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const query = { email: email };
+            const result = await userCollection.findOne(query)
             res.send(result)
         })
         //make admin
