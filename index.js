@@ -56,7 +56,15 @@ async function run() {
             const result = await toolsCollection.findOne(query);
             res.send(result)
         })
-
+        //delete tools
+        app.delete('/tools/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) };
+            const result = await toolsCollection.deleteOne(query);
+            if (result.deletedCount === 1) {
+                res.send(result)
+            }
+        })
         //Order
         app.post('/order', async (req, res) => {
             const newOrder = req.body;
