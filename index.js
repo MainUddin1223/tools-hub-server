@@ -5,6 +5,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express()
 const port = process.env.PORT || 5000;
+const stripe = require('stripe')(process.env.STRIPE_SECRET)
 app.use(cors())
 app.use(express.json())
 
@@ -56,6 +57,18 @@ async function run() {
             const result = await toolsCollection.findOne(query);
             res.send(result)
         })
+        //payment
+        app.post('/create-payment-intent', async (req, res) => {
+            const service = req.body;
+            const price =await service?.total;
+            const amount = 100* 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({ clientSecret: paymentIntent.client_secret })
+        })
         //delete tools
         app.delete('/tools/:id', async (req, res) => {
             const id = req.params.id
@@ -84,6 +97,13 @@ async function run() {
             const email = req.params.email;
             const query = { email: email };
             const result = await orderCollection.find(query).toArray();
+            res.send(result)
+        })
+        //get order by id
+        app.get('/orders/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.findOne(query);
             res.send(result)
         })
         //users collector api
